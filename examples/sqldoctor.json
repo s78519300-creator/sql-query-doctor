@@ -1,0 +1,59 @@
+{
+  "description": "Example config for the analytics warehouse used in examples/*.sql",
+  "dialect": "clickhouse",
+  "large_table_rows": 100000000,
+  "rules": {
+    "SQD006": {"options": {"min_terms": 3}},
+    "SQD018": {"options": {"threshold": 5000}}
+  },
+  "tables": {
+    "analytics.events": {
+      "rows": 4200000000,
+      "engine": "MergeTree",
+      "partition_by": "toYYYYMM(event_date)",
+      "order_by": ["event_type", "user_id", "event_time"],
+      "nullable": ["referrer"],
+      "high_cardinality": ["user_id", "session_id"]
+    },
+    "analytics.events_all": {
+      "rows": 16800000000,
+      "engine": "Distributed",
+      "distributed": true,
+      "partition_by": "toYYYYMM(event_date)",
+      "high_cardinality": ["user_id", "session_id"]
+    },
+    "analytics.sessions": {
+      "rows": 310000000,
+      "engine": "MergeTree",
+      "partition_by": "toYYYYMM(started_at)",
+      "order_by": ["user_id", "started_at"]
+    },
+    "analytics.users": {
+      "rows": 12000000,
+      "engine": "ReplacingMergeTree(updated_at)",
+      "order_by": ["user_id"],
+      "nullable": ["country"]
+    },
+    "analytics.users_all": {
+      "rows": 12000000,
+      "engine": "Distributed",
+      "distributed": true
+    },
+    "analytics.orders": {
+      "rows": 95000000,
+      "engine": "ReplacingMergeTree(version)",
+      "partition_by": "toYYYYMM(created_at)",
+      "order_by": ["user_id", "order_id"]
+    },
+    "analytics.page_views": {
+      "large": true,
+      "engine": "MergeTree",
+      "partition_by": "toDate(viewed_at)",
+      "order_by": ["site_id", "viewed_at"]
+    },
+    "ref.countries": {
+      "rows": 250,
+      "engine": "MergeTree"
+    }
+  }
+}
